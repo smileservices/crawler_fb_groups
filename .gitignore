@@ -1,0 +1,8 @@
+*.html
+*.log
+*.json
+.idea/
+results/
+__pycache__/
+cache/
+
