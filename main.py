@@ -15,8 +15,7 @@ logs_count = 0
 for user in users:
 
     fb_handle = FBCrawler(user)
-    fb_handle.get_groups_members()
-    fb_handle.export_group_members()
+    fb_handle.refresh_members()
     log('!!!!!!!!!! Done with user {} !!!!!!!!!!!!!!'.format(user.username))
 
 log('Done!')

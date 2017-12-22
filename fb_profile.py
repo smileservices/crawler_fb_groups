@@ -60,11 +60,12 @@ class FBProfile:
         gender = self.get_gender()
         log('Gender is {}'.format(gender))
         return {
+            'id': self.user_id, #temporary
             'firstname': firstname,
             'lastname': lastname,
+            'gender': gender,
             'dob': dob,
             'country_state_city': country_state_city,
-            'gender': gender,
         }
 
     def get_name(self):
