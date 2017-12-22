@@ -16,6 +16,6 @@ for user in users:
 
     fb_handle = FBCrawler(user)
     fb_handle.refresh_members()
-    log('!!!!!!!!!! Done with user {} !!!!!!!!!!!!!!'.format(user.username))
+    log('!!!!!!!!!! Done with user {} !!!!!!!!!!!!!!'.format(user['username']))
 
 log('Done!')

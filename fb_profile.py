@@ -14,9 +14,9 @@ class FBProfile:
     profile_url = "https://www.facebook.com/profile.php?id={}/about"
     fields_reg_mapping = {
         "name": r'<title id="pageTitle">(.+)</title>',
-        "dob": r'<[^>]*>', #restrict search to text after birthday (is actually a replace, not a match)
+        "dob": r'Birthday(<.{120,140}>)',  # restrict search to text after birthday (is actually a replace, not a match)
         "gender": r'">(Male|Female)</span>',
-        "city_state_country": r'Lives in .*>(.+)</a',
+        "city_state_country": r'Lives in (<.{100,250}>)',
     }
 
     def __init__(self, user_id, sess, uid):
@@ -27,8 +27,10 @@ class FBProfile:
         '''
         self.profile_sections = {}  # cache already loaded sections
         self.user_id = user_id
+        self.uid = uid
         self.sess = sess
-        self.profile_page = self.sess.get(self.profile_url.format(uid))  # will get redirected to vanity url if that exists
+        self.profile_page = self.sess.get(
+            self.profile_url.format(uid))  # will get redirected to vanity url if that exists
         log('Retrieving profile page at url {}'.format(self.profile_page.url))
         self.vanity_url = self.profile_page.url
         self.secured_url = self.get_secured_url()
@@ -60,7 +62,7 @@ class FBProfile:
         gender = self.get_gender()
         log('Gender is {}'.format(gender))
         return {
-            'id': self.user_id, #temporary
+            'id': self.uid,  # temporary
             'firstname': firstname,
             'lastname': lastname,
             'gender': gender,
@@ -75,15 +77,19 @@ class FBProfile:
         return firstname, lastname
 
     def get_dob(self):
-        bday_text = re.search(r'Birthday(<.{120,140}>)', self.get_about_section('contact-info').text)
+        bday_text = re.search(self.fields_reg_mapping['dob'], self.get_about_section('contact-info').text)
         if bday_text is not None:
             return re.sub(r'<[^>]*>', '', bday_text.group(1))
         else:
             return ''
 
     def get_country_state_city(self):
-        csc = re.search(self.fields_reg_mapping['city_state_country'], self.get_about_section('overview').text)
-        return csc.group(1) if csc is not None else ''
+        location_text = re.search(self.fields_reg_mapping['city_state_country'],
+                                  self.get_about_section('overview').text)
+        if location_text is not None:
+            return re.sub(r'<[^>]*>', '', location_text.group(1))
+        else:
+            return ''
 
     def get_gender(self):
         basic_info_page = self.get_about_section('contact-info')

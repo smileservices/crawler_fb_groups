@@ -74,12 +74,17 @@ class FBGroup:
     def gather_members(self):
         regexp = 'member_id=(\d*)'
         members = set()
+        duplicate = False
         for m in re.finditer(regexp, self.current_result.text):
             if m.group(1) not in self.members:
                 members.add(m.group(1))
             else:
-                raise RepeatingMembers("Found duplicate member_id. Halting this group")
+                duplicate = True
+                break
         self.members |= members
+        if duplicate is True:
+            raise RepeatingMembers("Found duplicate member_id. Halting this group")
+
 
     def get_members(self):
         '''

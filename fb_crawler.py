@@ -37,11 +37,8 @@ class FBCrawler:
         log_html(self.current_result, 'login')
 
     def refresh_members(self):
-        try:
-            self.get_groups_members()
-        except RepeatingMembers as e:
-            log(str(e))
-            self.export_group_members()
+        self.get_groups_members()
+        self.export_group_members()
 
     def get_groups_members(self):
         log('Getting group members for user {}'.format(self.user['user_id']))
@@ -68,16 +65,16 @@ class FBCrawler:
                     writer = csv.writer(csvfile, quoting=csv.QUOTE_ALL)
                     writer.writerow(['UID','Firstname', 'Lastname', 'Gender', 'Date of birth', 'Location'])
                     for member_id in group_obj.members:
-                        fbuser = FBProfile(self.user.user_id, self.sess, member_id)
+                        fbuser = FBProfile(self.user['user_id'], self.sess, member_id)
                         user_data = fbuser.get_user_data()
-                        writer.writerow(
+                        writer.writerow([
                             user_data['id'],
                             user_data['firstname'],
                             user_data['lastname'],
                             user_data['gender'],
                             user_data['dob'],
                             user_data['country_state_city']
-                        )
+                            ])
 
         except PermissionError as detail:
             log('PermissionError: {}'.format(detail))
