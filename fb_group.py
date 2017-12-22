@@ -40,7 +40,6 @@ class FBGroup:
         check if we cached the group and parse its members as set
         if the group is not cached, just create empty set
         '''
-        # todo check for cached group
         try:
             cached_members = pickle.load(open(self.cache_file_path, 'rb'))
             log('Loaded {} cached members'.format(len(cached_members)))
@@ -78,8 +77,8 @@ class FBGroup:
         for m in re.finditer(regexp, self.current_result.text):
             if m.group(1) not in self.members:
                 members.add(m.group(1))
-                # else:
-                # raise RepeatingMembers("Found duplicate member_id. Halting this group")
+            else:
+                raise RepeatingMembers("Found duplicate member_id. Halting this group")
         self.members |= members
 
     def get_members(self):
@@ -138,7 +137,7 @@ class FBGroup:
         log('Request number {} finished with status code {} in {} seconds'.format(self.requests,
                                                                                   self.current_result.status_code,
                                                                                   exec_time))
-        time.sleep(3)
+        time.sleep(2)
 
     def dyn_rand(self):
         '''
