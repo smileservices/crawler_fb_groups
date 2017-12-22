@@ -76,7 +76,7 @@ class FBProfile:
     def get_dob(self):
         bday_text = re.search(r'Birthday(<.{120,140}>)', self.get_about_section('contact-info').text)
         if bday_text is not None:
-            return re.sub(r'<[^>]*>', '', bday_text.group(1))cd D
+            return re.sub(r'<[^>]*>', '', bday_text.group(1))
         else:
             return ''
 
