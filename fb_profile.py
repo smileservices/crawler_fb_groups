@@ -11,7 +11,7 @@ class FBProfile:
     Manages the user's profile data
     '''
 
-    profile_url = "https://www.facebook.com/profile.php?id={}/about"
+    profile_url = "https://www.facebook.com/profile.php?id={}"
     fields_reg_mapping = {
         "name": r'<title id="pageTitle">(.+)</title>',
         "dob": r'Birthday(<.{120,140}>)',  # restrict search to text after birthday (is actually a replace, not a match)
@@ -38,10 +38,16 @@ class FBProfile:
 
     def get_secured_url(self):
         # extract page search keys
-        secure_url_pat = r'{}\?lst={}(.+)">About<span'.format(self.vanity_url + '/about', self.user_id)
+        secure_url_pat = r'{}\?lst={}(.+?)"'.format(self.vanity_url + '/about', self.user_id)
         secured_string = re.search(secure_url_pat, self.profile_page.text)
         if secured_string is None:
-            raise CrucialFBDataNotFound('No secure url to about section found on user\'s page')
+            log('Does not have vanity url')
+            secure_url_pat = r'{}&amp;lst={}(.+?)"'.format(re.sub(r'([\?])', r'\\\1', self.vanity_url), self.user_id)
+            secured_string_old = re.search(secure_url_pat, self.profile_page.text)
+            if secured_string_old is None:
+                raise CrucialFBDataNotFound('No secure url to about section found on user\'s page')
+            #https://www.facebook.com/profile.php?id=100004400105419&amp;lst=100000189256900%3A100004400105419%3A1514026608&amp;sk=about
+            return self.vanity_url + '&amp;lst={}{}&amp;sk=about'.format(self.user_id, secured_string_old.group(1))
         return self.vanity_url + '/about?lst={}{}'.format(self.user_id, secured_string.group(1))
 
     def get_about_section(self, section):

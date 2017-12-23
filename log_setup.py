@@ -2,7 +2,7 @@ import io
 
 
 def log(message):
-    print(message)
+    print(message.encode('utf-8'))
     with io.open('logs/log', 'a', encoding="utf-8") as file:
         file.write(message + '\n')
 

@@ -61,7 +61,7 @@ class FBCrawler:
 
         try:
             for group_id, group_obj in self.groups.items():
-                with open(self.results_csv.format(group_id), 'w', newline='') as csvfile:
+                with open(self.results_csv.format(group_id), 'w', newline='', encoding='utf-8') as csvfile:
                     writer = csv.writer(csvfile, quoting=csv.QUOTE_ALL)
                     writer.writerow(['UID','Firstname', 'Lastname', 'Gender', 'Date of birth', 'Location'])
                     for member_id in group_obj.members:
