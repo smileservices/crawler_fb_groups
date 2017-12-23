@@ -4,7 +4,7 @@ from log_setup import log, log_html
 from bs4 import BeautifulSoup
 
 from fb_group import FBGroup, RepeatingMembers
-from fb_profile import FBProfile
+from fb_profile import FBProfile, CrucialFBDataNotFound
 
 class FBCrawler:
     def __init__(self, user):
@@ -65,16 +65,18 @@ class FBCrawler:
                     writer = csv.writer(csvfile, quoting=csv.QUOTE_ALL)
                     writer.writerow(['UID','Firstname', 'Lastname', 'Gender', 'Date of birth', 'Location'])
                     for member_id in group_obj.members:
-                        fbuser = FBProfile(self.user['user_id'], self.sess, member_id)
-                        user_data = fbuser.get_user_data()
-                        writer.writerow([
-                            user_data['id'],
-                            user_data['firstname'],
-                            user_data['lastname'],
-                            user_data['gender'],
-                            user_data['dob'],
-                            user_data['country_state_city']
+                        try:
+                            fbuser = FBProfile(self.user['user_id'], self.sess, member_id)
+                            user_data = fbuser.get_user_data()
+                            writer.writerow([
+                                user_data['id'],
+                                user_data['firstname'],
+                                user_data['lastname'],
+                                user_data['gender'],
+                                user_data['dob'],
+                                user_data['country_state_city']
                             ])
-
+                        except CrucialFBDataNotFound as e:
+                            log(str(e))
         except PermissionError as detail:
             log('PermissionError: {}'.format(detail))
