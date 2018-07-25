@@ -1,0 +1,10 @@
+[
+  {
+    "username": "someuser@gmail.com",
+    "password": "somepass",
+    "user_id": "someuser.id",
+    "groups": [
+      "groupid1","groupid2","groupid3"
+    ]
+  }
+]
