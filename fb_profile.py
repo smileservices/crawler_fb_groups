@@ -1,9 +1,38 @@
-import re
+import re, pickle
 from log_setup import log, log_html
 
 
 class CrucialFBDataNotFound(Exception):
     pass
+
+
+class NotFoundInCache(Exception):
+    pass
+
+
+class FBProfilesRgistry:
+    profiles_cache = 'cache/profiles_register.pkl'  # all profiles are saved here
+
+    def __init__(self):
+        try:
+            self.profiles = pickle.load(open(self.profiles_cache, 'rb'))
+        except FileNotFoundError:
+            log('No cache found for fb profiles...')
+
+    def profile_exist(self, uid):
+        return True if uid in self.profiles else False
+
+    def add_profile(self, uid, data):
+        self.profiles[uid] = data
+
+    def retrieve_profile(self, uid):
+        if self.profile_exist(uid):
+            return self.profiles[uid]
+        else:
+            raise NotFoundInCache('Profile does not exist in cache!')
+
+    def save_to_cache(self):
+        pickle.dump(self.profiles, open(self.profiles_cache, 'wb'))
 
 
 class FBProfile:
@@ -46,7 +75,7 @@ class FBProfile:
             secured_string_old = re.search(secure_url_pat, self.profile_page.text)
             if secured_string_old is None:
                 raise CrucialFBDataNotFound('No secure url to about section found on user\'s page')
-            #https://www.facebook.com/profile.php?id=100004400105419&amp;lst=100000189256900%3A100004400105419%3A1514026608&amp;sk=about
+            # https://www.facebook.com/profile.php?id=100004400105419&amp;lst=100000189256900%3A100004400105419%3A1514026608&amp;sk=about
             return self.vanity_url + '&amp;lst={}{}&amp;sk=about'.format(self.user_id, secured_string_old.group(1))
         return self.vanity_url + '/about?lst={}{}'.format(self.user_id, secured_string.group(1))
 

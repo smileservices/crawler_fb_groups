@@ -4,7 +4,7 @@ from log_setup import log, log_html
 from bs4 import BeautifulSoup
 
 from fb_group import FBGroup, RepeatingMembers
-from fb_profile import FBProfile, CrucialFBDataNotFound
+from fb_profile import FBProfile, CrucialFBDataNotFound, FBProfilesRgistry
 
 class FBCrawler:
     def __init__(self, user):
@@ -60,14 +60,19 @@ class FBCrawler:
         import csv
 
         try:
+            #instantiate profiles registry
+            fbProfilesRegistry = FBProfilesRgistry()
             for group_id, group_obj in self.groups.items():
                 with open(self.results_csv.format(group_id), 'w', newline='', encoding='utf-8') as csvfile:
                     writer = csv.writer(csvfile, quoting=csv.QUOTE_ALL)
                     writer.writerow(['UID','Firstname', 'Lastname', 'Gender', 'Date of birth', 'Location'])
                     for member_id in group_obj.members:
+                        log('Resolving member id {} ...'.format(member_id))
                         try:
-                            fbuser = FBProfile(self.user['user_id'], self.sess, member_id)
-                            user_data = fbuser.get_user_data()
+                            if not fbProfilesRegistry.profile_exist(member_id):
+                                fbuser = FBProfile(self.user['user_id'], self.sess, member_id)
+                                fbProfilesRegistry.add_profile(member_id, fbuser.get_user_data())
+                            user_data = fbProfilesRegistry.retrieve_profile(member_id)
                             writer.writerow([
                                 user_data['id'],
                                 user_data['firstname'],
@@ -78,5 +83,8 @@ class FBCrawler:
                             ])
                         except CrucialFBDataNotFound as e:
                             log(str(e))
+                            continue
+            #save fb profile registry to cache
+            fbProfilesRegistry.save_to_cache()
         except PermissionError as detail:
             log('PermissionError: {}'.format(detail))

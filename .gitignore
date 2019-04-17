@@ -1,6 +1,7 @@
 *.html
 *.log
 *.json
+*.pyc
 .idea/
 results/
 __pycache__/

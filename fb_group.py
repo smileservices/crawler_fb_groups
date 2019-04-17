@@ -44,7 +44,7 @@ class FBGroup:
             cached_members = pickle.load(open(self.cache_file_path, 'rb'))
             log('Loaded {} cached members'.format(len(cached_members)))
             self.members |= cached_members
-        except:
+        except FileNotFoundError:
             log('No cache found for group id {}'.format(self.group_id))
 
     def get_current_cursor(self):
